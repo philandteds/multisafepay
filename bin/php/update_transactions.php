@@ -28,7 +28,7 @@ $timestamp = microtime( true );
 
 $cli->output( 'Fetching MSP transactions' );
 
-$transactions = MultiSafepayTransaction::fetchList( array( 'status' => 'initialized' ) );
+$transactions = MultiSafepayTransaction::fetchList( array( 'status' => array( array( 'initialized', 'uncleared' ) )' ) );
 $count        = count( $transactions );
 foreach( $transactions as $k => $transaction ) {
     $memoryUsage = number_format( memory_get_usage( true ) / ( 1024 * 1024 ), 2 );
