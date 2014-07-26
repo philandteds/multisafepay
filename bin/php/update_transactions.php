@@ -26,9 +26,8 @@ $options = $script->getOptions(
 
 $timestamp = microtime( true );
 
-$cli->output( 'Fetching MSP transactions' );
-
-$transactions = MultiSafepayTransaction::fetchList( array( 'status' => array( array( 'initialized', 'uncleared' ) )' ) );
+$cli->output( 'Fetching non-completed MSP transactions' );
+$transactions = MultiSafepayTransaction::fetchList( array( 'status' => array( array( 'initialized', 'uncleared' ) ) ) );
 $count        = count( $transactions );
 foreach( $transactions as $k => $transaction ) {
     $memoryUsage = number_format( memory_get_usage( true ) / ( 1024 * 1024 ), 2 );
@@ -57,6 +56,28 @@ foreach( $transactions as $k => $transaction ) {
 
         $transaction->updatePaymentObject();
     }
+}
+
+$cli->output( 'Fetching completed MSP transactions' );
+$transactions = MultiSafepayTransaction::fetchList( array( 'status' => array( array( 'completed' ) ) ) );
+$count        = count( $transactions );
+foreach( $transactions as $k => $transaction ) {
+    $memoryUsage = number_format( memory_get_usage( true ) / ( 1024 * 1024 ), 2 );
+    $message     = '[' . date( 'c' ) . '] ' . number_format( $k / $count * 100, 2 )
+        . '% (' . $k . '/' . $count . '), Memory usage: ' . $memoryUsage . ' Mb';
+    $cli->output( $message );
+
+    $order = $transaction->attribute( 'order' );
+    if( $order instanceof eZOrder === false ) {
+        continue;
+    }
+
+    if( (bool) $order->attribute( 'is_temporary' ) === false ) {
+        continue;
+    }
+
+    $cli->output( 'Processing order#' . $order->attribute( 'id' ) );
+    $transaction->updatePaymentObject();
 }
 
 $cli->output( 'Finished in ' . number_format( microtime( true ) - $timestamp, 2 ) . ' sec.' );
