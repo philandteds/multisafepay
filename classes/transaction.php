@@ -726,8 +726,12 @@ class MultiSafepayTransaction extends eZPersistentObject {
         eZINI::instance()->setVariable( 'SiteSettings', 'SiteURL', $host );
 
         // Set SA path
-        $tmp                         = explode( '/', $host );
-        eZSys::instance()->IndexFile = '/' . end( $tmp );
+        $tmp = explode( '/', $host );
+        $sys = eZSys::instance();
+
+        if( $sa !== null ) {
+            $sys->setAccessPath( array( end( $tmp ) ), $sa );
+        }
     }
 
 }
