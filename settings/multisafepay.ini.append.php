@@ -16,6 +16,8 @@ CancelURL=/
 RedirectURL=multisafepay/notify?redirect=1
 # 7 days
 LogsExpiryTime=604800
+# 7 days
+TransactionsSyncExpirtTime=604800
 
 [NavigationParts]
 Logs=ezsetupnavigationpart

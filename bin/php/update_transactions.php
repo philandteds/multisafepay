@@ -24,10 +24,15 @@ $options = $script->getOptions(
 );
 
 
-$timestamp = microtime( true );
+$timestamp     = microtime( true );
+$minCreateDate = time() - eZINI::instance( 'multisafepay.ini' )->variable( 'General', 'TransactionsSyncExpirtTime' );
 
 $cli->output( 'Fetching non-completed MSP transactions' );
-$transactions = MultiSafepayTransaction::fetchList( array( 'status' => array( array( 'initialized', 'uncleared' ) ) ) );
+$fetchParams  = array(
+    'status'  => array( array( 'initialized', 'uncleared' ) ),
+    'created' => array( '>', $minCreateDate )
+);
+$transactions = MultiSafepayTransaction::fetchList( $fetchParams );
 $count        = count( $transactions );
 foreach( $transactions as $k => $transaction ) {
     $memoryUsage = number_format( memory_get_usage( true ) / ( 1024 * 1024 ), 2 );
@@ -59,7 +64,11 @@ foreach( $transactions as $k => $transaction ) {
 }
 
 $cli->output( 'Fetching completed MSP transactions' );
-$transactions = MultiSafepayTransaction::fetchList( array( 'status' => array( array( 'completed' ) ) ) );
+$fetchParams  = array(
+    'status'  => array( array( 'completed' ) ),
+    'updated' => array( '>', $minCreateDate )
+);
+$transactions = MultiSafepayTransaction::fetchList( $fetchParams );
 $count        = count( $transactions );
 foreach( $transactions as $k => $transaction ) {
     $memoryUsage = number_format( memory_get_usage( true ) / ( 1024 * 1024 ), 2 );
