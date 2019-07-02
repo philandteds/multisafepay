@@ -493,8 +493,24 @@ class MultiSafepayTransaction extends eZPersistentObject {
 
         // Generate transactionID
         if( $this->attribute( 't_id' ) === null ) {
-            $this->setAttribute( 't_id', $this->ini->variable( 'General', 'TransactionIDPrefix' ) . $this->attribute( 'id' ) );
-            eZPersistentObject::storeObject( $this, $fieldFilters );
+            if( $this->attribute( 'error_code' ) === null && $this->attribute( 'error_description' ) === null) {
+                $this->setAttribute( 't_id', $this->ini->variable( 'General', 'TransactionIDPrefix' ) . $this->attribute( 'id' ) );
+                eZPersistentObject::storeObject( $this, $fieldFilters );
+            }
+        }
+        if( $this->attribute( 'error_code' ) !== null && $this->attribute( 'error_description' ) !== null) {
+            // email the webshop to at least notifiy them we have received a error
+            // https://trello.com/c/N1ybJhgS
+            $body = 'Please check order '
+                . $this->ini->variable( 'General', 'TransactionIDPrefix' ) . $this->attribute( 'id' )
+                . ' for issues.';
+            $mail = new eZMail();
+            $mail->setContentType('text/html');
+            $mail->setSender(eZINI::instance()->variable('MailSettings', 'AdminEmail'));
+            $mail->setSubject('Multisafepay transaction issue');
+            $mail->setBody($body);
+            $mail->addReceiver(eZINI::instance()->variable('MailSettings', 'EmailSender'));
+            eZMailTransport::send($mail);
         }
     }
 
