@@ -498,7 +498,7 @@ class MultiSafepayTransaction extends eZPersistentObject {
                 eZPersistentObject::storeObject( $this, $fieldFilters );
             }
         }
-        if( $this->attribute( 'error_code' ) !== null && $this->attribute( 'error_description' ) === null) {
+        if( $this->attribute( 'error_code' ) !== null && $this->attribute( 'error_description' ) !== null) {
             // email the webshop to at least notifiy them we have received a error
             // https://trello.com/c/N1ybJhgS
             $body = 'Please check order '
